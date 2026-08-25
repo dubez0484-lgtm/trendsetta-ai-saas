@@ -54,30 +54,30 @@ soft glow, glassmorphism, mobile-first responsive by default.
 |---|---|---|
 | | | |
 
-### Repo audit — 2026-08-25
+### Repo audit — 2026-08-25 (corrected)
 
 Performed against the `dubez0484-lgtm` GitHub account (verified via GitHub
-repo search, not assumed) and the "Zakhele's Lovable" Lovable workspace
+repo search) and the "Zakhele's Lovable" Lovable workspace
 (id `7WteGo9p8DLQjgYYzrii`, 8 projects).
 
-**GitHub account reality check:** `dubez0484-lgtm` currently owns exactly
-**one** repository: `trendsetta-ai-saas` (this repo). None of the following
-exist under this account: `thetrendsetta-app`, `Thetrendsetta-system.app`,
-`trendsetter-funnel`, `thetrendsetta-system`, `ThetrendsettaOs`. They were
-not attached because there is nothing to attach yet, and none could be
-created — this account can't create repos via this GitHub App connector
-(personal-account restriction, see note at top of file). Someone needs to
-either create these repos manually (via "Sync my code" from Lovable, or by
-hand) or confirm they exist under a different GitHub account.
+**Correction:** an earlier pass in this same session reported only 1 repo
+on this account. That was wrong — it reflected a scoping limit on the
+connected GitHub App's repository-access list (set to "Only select
+repositories" → just `trendsetta-ai-saas`), not the account's actual
+contents. Zakhele confirmed via the GitHub UI and widened the App's
+repository access to all repos; the audit below is the corrected,
+verified result. `ThetrendsettaOs` still does not exist and still can't
+be created via this connector — that limitation (GitHub Apps can't create
+repos under personal accounts) is real and unrelated to the scoping bug.
 
-| Repo | Exists? | Files (root) | Size | Last commit | Empty / never synced? |
+| Repo | Visibility | Files (root) | Size | Last commit | Status |
 |---|---|---|---|---|---|
-| `trendsetta-ai-saas` | Yes (public) | 1 (`README.md`, 20 bytes) — before this commit | 0 KB | `166b6d2` "Initial commit" — 2026-08-18 | **Yes** — never synced from Lovable, was README-only stub |
-| `thetrendsetta-app` | **Not found** | — | — | — | Does not exist under this account |
-| `Thetrendsetta-system.app` | **Not found** | — | — | — | Does not exist under this account |
-| `trendsetter-funnel` | **Not found** | — | — | — | Does not exist under this account |
-| `thetrendsetta-system` | **Not found** | — | — | — | Does not exist under this account |
-| `ThetrendsettaOs` | **Not created** | — | — | — | Blocked — GitHub Apps can't create repos in personal accounts |
+| `trendsetta-ai-saas` | Public | 1 (`README.md`) on `main`; this file lands via a merge from a feature branch | 0 KB | `166b6d2` "Initial commit" — 2026-08-18 | **Empty/stub** — never synced from Lovable |
+| `thetrendsetta-app` | Private | 1 (`index.html`, ~20 KB) | 33 KB | "Create index.html" — 2026-05-24 | Has content — single static HTML file, not a Lovable-scaffolded project |
+| `Thetrendsetta-system.app` | Private | Full Vite/React/TS/Supabase scaffold (`src/`, `supabase/`, `package.json`, etc.) | 547 KB | "Added checkout catalog & btn" (lovable-dev[bot]) — 2026-08-15 | **Actively synced from Lovable.** ⚠️ Has a committed `.env` (685 bytes) at root — check it for leaked secrets |
+| `trendsetter-funnel` | Private | Full Vite/React/TS/Supabase scaffold, same shape as above | 232 KB | "Built THETRENDSETTA engine" (lovable-dev[bot]) — 2026-06-23 | **Actively synced from Lovable.** ⚠️ Also has a committed `.env` (685 bytes) at root — check it for leaked secrets |
+| `thetrendsetta-system` | Private | 0 | 0 Bytes | none — repo has no commits at all | **Truly empty** — needs a fresh "Sync my code" push from its matching Lovable project |
+| `ThetrendsettaOs` | — | — | — | — | **Does not exist, still can't be created** — GitHub Apps cannot create repos under personal GitHub accounts (platform restriction, not a permission gap) |
 
 **Lovable workspace inventory** (`Zakhele's Lovable`, 8 projects; none
 currently show a linked/synced GitHub repo — none have run "Sync my code"
