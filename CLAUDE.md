@@ -101,6 +101,23 @@ below. `South African Compliance Hub` and `catering-perfection-page` are
 but this is a guess, not a confirmed mapping — verify with Zakhele before
 filling in the sync table above.
 
+### Workspace migration verification — 2026-08-26
+
+Zakhele reported that **Trendsetter OS** was remixed (with history) out of his
+own Lovable account into **"Miish's Lovable"** workspace
+(owner: lordmiish531@gmail.com, id `V76qlVB7HXtDLxl4FHZH`, pro plan) so it
+sits under a paid plan, and connected to a new GitHub repo,
+`dubez0484-lgtm/remix-of-trendsetter-os`. Verified directly this session:
+
+| Check | Result |
+|---|---|
+| GitHub repo `dubez0484-lgtm/remix-of-trendsetter-os` | **Exists, reachable, cloned.** Full Vite/React/TS/Supabase scaffold (`src/`, `supabase/`, `package.json`, `vite.config.ts`). Single commit on `main`: "Add project README" (2026-08-26 01:00 UTC). Has a committed `.env` at root — checked contents: only `SUPABASE_PROJECT_ID` / `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` (anon/publishable key, safe to be public) — **not a secret leak**, unlike the `.env` files flagged in the other two repos in the 2026-08-25 audit above (those haven't been re-checked, still flagged). |
+| Lovable project "Remix of Remix of Trendsetter OS" | **Exists** in the "Miish's Lovable" workspace, id `481368c2-232b-4046-8b78-12814b9f3f3d`, status `completed`/`ready`, live preview renders correctly (THETRENDSETTA landing page, cyberpunk-luxury styling matches brand system). `Miish's Lovable` is the only workspace visible to this session's connected Lovable account — matches the "moved to a paid plan under Miish" story. |
+| Supabase connection | **⚠️ Cannot verify — likely broken or under a different account.** The repo's `.env` points at Supabase project ref `qhsetblivjmpqzmpohad`, but this session's connected Supabase account only has access to 3 projects (`Thetrendsetta®-opportunity`, `Thetrendsetta™`, `Orange restaurant Demo`) — `qhsetblivjmpqzmpohad` is not among them, and a direct lookup was denied ("do not have permission"). **Do not assume tables/schema exist for this project** — this needs to be resolved (is it under Miish's Supabase account? does Zakhele's Supabase account need inviting as a collaborator?) before any schema-first DB work (e.g. Lead Magnet Builder) proceeds against it. |
+
+Rename cleanup still open: project displays as "Remix of Remix of Trendsetter
+OS" — cosmetic, low priority.
+
 ## Open reconciliation issue
 
 KasiOS, ComplyLink, Khumo, LekkerTable, MEGA Link, and EOS School are
