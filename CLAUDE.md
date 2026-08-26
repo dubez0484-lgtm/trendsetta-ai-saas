@@ -5,11 +5,19 @@ this repo reads this file first and operates under it for the duration of
 the session.
 
 > Note: this policy file was originally requested for a separate
-> `ThetrendsettaOs` repo. That repo could not be created — GitHub Apps
-> (the connector this session uses) cannot create repositories under a
-> personal GitHub account (`dubez0484-lgtm`), only under organizations;
-> this is a GitHub platform restriction, not a permission setting. By
-> decision, it lives here in `trendsetta-ai-saas` instead.
+> `ThetrendsettaOs` repo. That repo could not be created via this
+> session's GitHub App connector — GitHub Apps cannot create
+> repositories under a personal GitHub account (`dubez0484-lgtm`), only
+> under organizations; this is a GitHub platform restriction, not a
+> permission setting. By decision, this policy file lives here in
+> `trendsetta-ai-saas` instead.
+>
+> **Update — 2026-08-26: `ThetrendsettaOs` now exists.** Zakhele created
+> it directly via the GitHub UI (public, under `dubez0484-lgtm`, with a
+> README), which sidesteps the App's org-only restriction. Verified this
+> session: cloned successfully, commit `729bb1c`, contains only
+> `README.md` so far — content/purpose for this repo still to be
+> decided.
 
 ## Identity
 
