@@ -172,16 +172,45 @@ idempotency, duplicate-comment prevention). Vitest is configured with
 `fileParallelism: false` (`vitest.config.ts`) since test files share and
 reset that one database.
 
-## Production deployment
+## Production deployment (Vercel)
 
-1. Provision PostgreSQL, run `npm run prisma:deploy` (`prisma migrate deploy`) against it.
-2. Set every variable in `.env.example` to real, production values — especially:
-   - `TOKEN_ENCRYPTION_KEY` and `NEXTAUTH_SECRET`: freshly generated, stored in a secrets manager, never reused from development.
-   - `META_GRAPH_API_VERSION`: verified current per `docs/META_SETUP.md`.
+Vercel is the native host for Next.js App Router and gives a real HTTPS
+URL immediately, which Meta's webhook requires (it will not deliver to
+`localhost`). This connects your existing GitHub repo — no separate
+account setup beyond signing in with GitHub.
+
+1. Go to https://vercel.com and sign in with the GitHub account that owns
+   this repo (`dubez0484-lgtm/trendsetta-ai-saas`).
+2. **Add New → Project**, select this repo, branch
+   `claude/meta-comment-dm-engine-r7prm8` (or your default branch once
+   merged). Vercel auto-detects Next.js — leave the build command as
+   `next build` (already the `npm run build` script) and the install
+   command as `npm install` (this repo's `postinstall` already runs
+   `prisma generate`, so no extra build-command changes are needed).
+3. Before the first deploy, add every variable from `.env.example` under
+   **Project Settings → Environment Variables** (Production environment),
+   with real values:
+   - `DATABASE_URL` — from your Postgres provider (see below).
+   - `NEXTAUTH_SECRET` — `openssl rand -base64 32`.
+   - `NEXTAUTH_URL` — your Vercel URL once known, e.g. `https://your-project.vercel.app` (you can add this after the first deploy gives you the URL, then redeploy).
+   - `META_APP_ID`, `META_APP_SECRET`, `META_GRAPH_API_VERSION`, `META_REDIRECT_URI` — from `docs/META_SETUP.md`.
+   - `WEBHOOK_VERIFY_TOKEN`, `TOKEN_ENCRYPTION_KEY` — your own generated values.
+   - `MCP_AUTH_TOKEN`, `MCP_AUTH_USER_EMAIL` — your own; note the MCP server (`npm run mcp`) is a separate long-running process, not deployed by Vercel's serverless functions — run it elsewhere (a small VM/container) if AI-agent access is needed against production data.
    - `MOCK_META=false`.
-3. Deploy the Next.js app (`npm run build && npm run start`, or your platform's Next.js adapter).
-4. Deploy `npm run mcp` as its own long-running process/service if AI-agent access is needed — it is not part of the Next.js server.
-5. Point the Meta App Dashboard's webhook callback URL at your deployed `/api/webhooks/meta` and complete the checklist in `docs/META_SETUP.md` §8.
+4. Run the Prisma migration against your production database **before or
+   right after** the first deploy: `npx prisma migrate deploy` from a
+   machine that can reach the database (or apply the SQL in
+   `prisma/migrations/20260826095034_init/migration.sql` directly via your
+   Postgres provider's SQL console — this is exactly what the migration
+   does).
+5. Deploy. Vercel gives you a `https://<project>.vercel.app` URL —
+   confirm `GET https://<project>.vercel.app/api/webhooks/meta?hub.mode=subscribe&hub.verify_token=<your token>&hub.challenge=123` returns `123` before configuring it in the Meta App Dashboard.
+6. Point the Meta App Dashboard's webhook callback URL at
+   `https://<project>.vercel.app/api/webhooks/meta` and complete the
+   checklist in `docs/META_SETUP.md`.
+
+(Netlify is also viable per this project's stack policy — same env vars,
+their Next.js runtime adapter handles the App Router API routes.)
 
 ## Security checklist
 
