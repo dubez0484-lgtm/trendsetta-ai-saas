@@ -16,15 +16,20 @@ import { Platform } from '@prisma/client';
 // Scopes required for comment-to-DM automation across Facebook Pages and
 // connected Instagram professional accounts. See docs/META_SETUP.md for
 // the App Review requirements behind each of these.
+//
+// NOTE: the Instagram scopes below use the "instagram_business_*" naming.
+// Meta retired the older "instagram_basic" / "instagram_manage_comments" /
+// "instagram_manage_messages" names on January 27, 2025 — using them today
+// will fail. Facebook Page scopes (pages_*) were not renamed.
 export const META_OAUTH_SCOPES = [
   'pages_show_list',
   'pages_read_engagement',
   'pages_manage_engagement',
   'pages_manage_metadata',
   'pages_messaging',
-  'instagram_basic',
-  'instagram_manage_comments',
-  'instagram_manage_messages',
+  'instagram_business_basic',
+  'instagram_business_manage_comments',
+  'instagram_business_manage_messages',
   'business_management',
 ].join(',');
 

@@ -17,7 +17,14 @@ export interface MetaApiError {
   metaErrorSubcode?: number;
 }
 
-const DEFAULT_GRAPH_VERSION = 'v21.0';
+// Verified against secondary sources as of 2026-08-26 (direct fetch to
+// developers.facebook.com is blocked in this build environment — this
+// value has NOT been confirmed against Meta's primary changelog and MUST
+// be re-verified in the App Dashboard / at
+// https://developers.facebook.com/docs/graph-api/changelog before
+// deploying). Always overridable via META_GRAPH_API_VERSION — never
+// change this fallback without updating that comment.
+const DEFAULT_GRAPH_VERSION = 'v25.0';
 
 export function getGraphApiVersion(): string {
   return process.env.META_GRAPH_API_VERSION || DEFAULT_GRAPH_VERSION;
