@@ -3,7 +3,15 @@
 // model. Run `npm run prisma:migrate` after any change here.
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // Without this, Vercel's build machine and serverless runtime can
+  // resolve to different OS targets, producing a Query Engine binary that
+  // isn't present at runtime — Prisma throws a PrismaClientInitializationError
+  // that this app's generic error handler (lib/errors/api-error.ts) then
+  // reports to the client as "An unexpected error occurred", independent
+  // of whether DATABASE_URL is correct. "native" keeps local dev working;
+  // "rhel-openssl-3.0.x" is Vercel's current Amazon Linux serverless target.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
