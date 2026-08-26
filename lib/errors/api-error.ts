@@ -59,6 +59,11 @@ export class ApiError extends Error {
   }
 }
 
+interface PrismaLikeError {
+  code?: string;
+  clientVersion?: string;
+}
+
 /** Converts any thrown value into a safe JSON error response. */
 export function toErrorResponse(error: unknown): NextResponse {
   if (error instanceof ApiError) {
@@ -69,13 +74,22 @@ export function toErrorResponse(error: unknown): NextResponse {
     return new ApiError('VALIDATION_ERROR', 'Request validation failed.', error.flatten()).toResponse();
   }
 
+  // Prisma errors carry a `code` (e.g. P2021 "table does not exist", P1001
+  // "can't reach database server") that's far more diagnostic than the
+  // message alone — surface it without dumping the full error object,
+  // which for connection-string parse failures can echo back the
+  // connection string itself (credentials included).
+  const prismaCode = (error as PrismaLikeError | undefined)?.code;
+
   // eslint-disable-next-line no-console
   console.error(
     JSON.stringify({
       level: 'error',
       event: 'unhandled_api_error',
       timestamp: new Date().toISOString(),
+      errorName: error instanceof Error ? error.constructor.name : typeof error,
       message: error instanceof Error ? error.message : String(error),
+      ...(prismaCode ? { prismaCode } : {}),
     }),
   );
 
