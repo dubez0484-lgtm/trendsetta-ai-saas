@@ -34,7 +34,7 @@ async function sendPrivateReply(commentId: string, accessToken: string, message:
 
 /**
  * Sends a private reply DM in response to an Instagram comment.
- * Requires `instagram_business_manage_messages` and a comment from within the last
+ * Requires `instagram_manage_messages` and a comment from within the last
  * 7 days (Meta policy) that has not already received a private reply.
  */
 export async function sendInstagramPrivateReply(

@@ -28,17 +28,36 @@ then, run in [mock mode](../README.md#mock-meta-mode) (`MOCK_META=true`).
   https://developers.facebook.com/docs/graph-api/changelog before going
   live — this is a 30-second check and it's the one fact in this doc you
   should trust least.
-- **Instagram permission names changed and the old ones are now
-  retired**: `instagram_basic`, `instagram_manage_comments`, and
-  `instagram_manage_messages` were deprecated **January 27, 2025**. Using
-  them today will fail to grant access. This app's OAuth scope list
-  (`lib/meta/oauth.ts`) has been updated to the current names:
-  `instagram_business_basic`, `instagram_business_manage_comments`,
-  `instagram_business_manage_messages`. **This was a real bug, now
-  fixed** — not just a documentation update.
-- Facebook Page permissions (`pages_show_list`, `pages_read_engagement`,
-  `pages_manage_engagement`, `pages_manage_metadata`, `pages_messaging`,
-  `business_management`) were not renamed and are unchanged.
+- **Instagram permission names — corrected against a live console, not
+  secondary sources.** An earlier pass of this document (and the code)
+  changed the scope list to `instagram_business_basic` /
+  `instagram_business_manage_comments` / `instagram_business_manage_messages`,
+  based on developer-blog claims that the older names were retired
+  January 27, 2025. **That was wrong for this product surface.** A
+  screenshot of an actual app's "Permissions and Features" console
+  (2026-08-26) showed the "Instagram API with Facebook Login" use case
+  requesting — and granting — `instagram_basic`, `instagram_manage_comments`,
+  and `instagram_manage_messages`, the older names. The `instagram_business_*`
+  renaming applies to the separate "Instagram API with Instagram Login"
+  product, not this one. `lib/meta/oauth.ts` now requests the names
+  confirmed live: `instagram_basic`, `instagram_manage_comments`,
+  `instagram_manage_messages`.
+- **Facebook Page messaging permissions are not available on the
+  Instagram API use case.** `pages_manage_engagement`, `pages_manage_metadata`,
+  and `pages_messaging` — needed for Facebook Page (not Instagram) comment-to-DM
+  — do not appear anywhere in that same console's full Permissions and
+  Features list for an app configured for "Instagram API with Facebook
+  Login". This app's OAuth scope list no longer requests them, which means
+  **the current OAuth flow only supports Instagram comment-to-DM, not
+  Facebook Page comment-to-DM** — `sendFacebookPrivateReply` in
+  `lib/meta/messaging.ts` will fail with a permission error if it's ever
+  reached, since the underlying SocialAccount would never have a token
+  with those scopes. Facebook Page support would need a separate
+  use case/product added in the Meta console, and the scope list
+  reverted to include those three, before that path could work.
+- `pages_show_list`, `pages_read_engagement`, and `business_management`
+  were confirmed present (as "Ready for testing") in that same console
+  and are still requested.
 - The webhook payload shapes this app's parser expects
   (`lib/meta/webhook-parser.ts`) — Instagram `comments` field
   (`value.id`, `value.text`, `value.from.{id,username}`, `value.media.id`)
@@ -130,24 +149,31 @@ something to work around by guessing at the other flow.
 
 ### 5. Request permissions
 
-Under **App Review → Permissions and Features** (or wherever the current
-UI surfaces permission requests), request:
+In the App Dashboard, go to **Use cases → [your Instagram API use case] →
+Customize**, and under **"API setup with Facebook login"** (not the
+Instagram Login tab), use the **"Add required content permissions"** and
+**"Add required messaging permissions"** buttons. That grants:
 
 | Permission | Why |
 |---|---|
 | `pages_show_list` | List the Pages the authorizing user manages |
 | `pages_read_engagement` | Read Page comments |
-| `pages_manage_engagement` | Reply to Page comments (private replies) |
-| `pages_manage_metadata` | Subscribe the Page to webhook fields |
-| `pages_messaging` | Send Facebook Page private replies (comment → DM) |
-| `instagram_business_basic` | Read basic Instagram account/media info |
-| `instagram_business_manage_comments` | Read Instagram comments |
-| `instagram_business_manage_messages` | Send Instagram private replies (comment → DM) |
+| `instagram_basic` | Read basic Instagram account/media info |
+| `instagram_manage_comments` | Read Instagram comments |
+| `instagram_manage_messages` | Send Instagram private replies (comment → DM) |
 | `business_management` | Manage the Business assets a Page/IG account belongs to |
 
 These exact names are requested together by `lib/meta/oauth.ts`
 (`META_OAUTH_SCOPES`) — you don't need to configure the scope string
 anywhere else.
+
+**Facebook Page comment-to-DM is not covered by this setup.**
+`pages_manage_engagement`, `pages_manage_metadata`, and `pages_messaging`
+do not appear in this app's Permissions and Features list at all under
+this use case — confirmed by scanning the full alphabetical list, not
+assumed. If you need Facebook Page (not just Instagram) automation later,
+that requires a separate use case/product in the console, and those three
+scopes added back to `META_OAUTH_SCOPES`.
 
 **In App Development Mode** (default for a new app), any of these
 permissions already work for accounts with a role on the app (you, as

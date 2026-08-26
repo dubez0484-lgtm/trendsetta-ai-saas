@@ -13,23 +13,35 @@ import { prisma } from '@/lib/db/prisma';
 import { getGraphApiBaseUrl, getGraphApiVersion } from '@/lib/meta/client';
 import { Platform } from '@prisma/client';
 
-// Scopes required for comment-to-DM automation across Facebook Pages and
-// connected Instagram professional accounts. See docs/META_SETUP.md for
-// the App Review requirements behind each of these.
+// Scopes for Instagram comment-to-DM automation via "Instagram API with
+// Facebook Login". See docs/META_SETUP.md for the App Review requirements
+// behind each of these.
 //
-// NOTE: the Instagram scopes below use the "instagram_business_*" naming.
-// Meta retired the older "instagram_basic" / "instagram_manage_comments" /
-// "instagram_manage_messages" names on January 27, 2025 — using them today
-// will fail. Facebook Page scopes (pages_*) were not renamed.
+// These names were corrected against a live app's Permissions and
+// Features console on 2026-08-26 (verified screenshot, not secondary
+// research this time): for this exact product surface, Meta's console
+// requests the older "instagram_basic" / "instagram_manage_comments" /
+// "instagram_manage_messages" names, not "instagram_business_*" — an
+// earlier version of this comment (based on secondary sources whose
+// primary-doc fetch was network-blocked) had that backwards. The
+// "instagram_business_*" renaming applies to the separate "Instagram API
+// with Instagram Login" product, not this one.
+//
+// pages_manage_engagement / pages_manage_metadata / pages_messaging are
+// deliberately NOT requested here: they do not appear as available
+// permissions under this app's Instagram API use case at all (confirmed
+// by scanning its full Permissions and Features list), which means this
+// OAuth flow currently only supports Instagram comment-to-DM, not
+// Facebook Page comment-to-DM. Requesting a scope the app doesn't have
+// access to is worse than omitting it. Facebook Page support would need
+// a separate use case/product added in the Meta console before these
+// three could be requested again.
 export const META_OAUTH_SCOPES = [
   'pages_show_list',
   'pages_read_engagement',
-  'pages_manage_engagement',
-  'pages_manage_metadata',
-  'pages_messaging',
-  'instagram_business_basic',
-  'instagram_business_manage_comments',
-  'instagram_business_manage_messages',
+  'instagram_basic',
+  'instagram_manage_comments',
+  'instagram_manage_messages',
   'business_management',
 ].join(',');
 
