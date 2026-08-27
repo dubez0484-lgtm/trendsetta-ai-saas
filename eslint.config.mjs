@@ -22,7 +22,11 @@ const eslintConfig = [
     // entirely and must never be used for these tables. Scoped to
     // wherever that server-side Core code lives -- update this glob
     // if that location changes.
-    files: ["src/lib/core/**/*.{ts,tsx}", "src/**/core/**/*.{ts,tsx}"],
+    files: [
+      "src/lib/core/**/*.{ts,tsx}",
+      "src/**/core/**/*.{ts,tsx}",
+      "src/app/app/**/*.{ts,tsx}",
+    ],
     rules: {
       "no-restricted-imports": [
         "error",
