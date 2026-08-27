@@ -48,11 +48,13 @@ model User {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
-  accounts       Account[]
-  sessions       Session[]
-  socialAccounts SocialAccount[]
-  automations    Automation[]
-  mcpApiKeys     McpApiKey[]
+  accounts             Account[]
+  sessions             Session[]
+  socialAccounts       SocialAccount[]
+  automations          Automation[]
+  mcpApiKeys           McpApiKey[]
+  workspacesOwned      Workspace[]           @relation("WorkspaceOwner")
+  workspaceMemberships WorkspaceMembership[]
 
   @@map("users")
 }
@@ -181,4 +183,125 @@ model McpApiKey {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("mcp_api_keys")
+}
+
+// ============================================================
+// Shared core platform (Phase 1/2): workspaces, membership, product
+// catalog, and billing foundation. These 5 tables live behind the
+// restricted "app_runtime" Postgres role and DB-enforced RLS -- see
+// src/lib/corePrisma.ts. They do not replace or alter any of the
+// models above.
+// ============================================================
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INVITED
+  REVOKED
+}
+
+enum ProductStatus {
+  ACTIVE
+  BETA
+  DEPRECATED
+}
+
+enum WorkspaceProductStatus {
+  ACTIVE
+  TRIAL
+  SUSPENDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner        User                  @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  memberships  WorkspaceMembership[]
+  products     WorkspaceProduct[]
+  subscription Subscription?
+
+  @@index([ownerId])
+  @@map("workspaces")
+}
+
+model WorkspaceMembership {
+  id           String           @id @default(cuid())
+  workspaceId  String
+  userId       String
+  role         WorkspaceRole    @default(MEMBER)
+  status       MembershipStatus @default(ACTIVE)
+  invitedEmail String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@index([workspaceId])
+  @@map("workspace_memberships")
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  description String?
+  status      ProductStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspaces WorkspaceProduct[]
+
+  @@map("products")
+}
+
+model WorkspaceProduct {
+  id          String                 @id @default(cuid())
+  workspaceId String
+  productId   String
+  status      WorkspaceProductStatus @default(ACTIVE)
+  enabledAt   DateTime               @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([workspaceId, productId])
+  @@index([workspaceId])
+  @@index([productId])
+  @@map("workspace_products")
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  workspaceId          String             @unique
+  tier                 SubscriptionTier   @default(FREE)
+  status               SubscriptionStatus @default(TRIALING)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
 }
