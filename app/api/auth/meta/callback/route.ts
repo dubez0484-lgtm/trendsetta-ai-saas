@@ -45,7 +45,21 @@ export async function GET(request: NextRequest) {
   const cookieState = request.cookies.get(META_OAUTH_STATE_COOKIE)?.value;
 
   if (!code || !state || !cookieState || state !== cookieState) {
-    logger.warn('meta_oauth_state_mismatch');
+    // Deliberately not logging the raw `Cookie` header — it also carries
+    // the NextAuth session cookie and would leak that into server logs.
+    // These booleans/counts are enough to tell "cookie never arrived"
+    // (e.g. blocked by browser/SameSite) apart from "cookie arrived but
+    // doesn't match" (e.g. a stale/reused callback URL) without exposing
+    // any cookie values.
+    const rawCookieHeader = request.headers.get('cookie');
+    logger.warn('meta_oauth_state_mismatch', {
+      hasCode: Boolean(code),
+      hasQueryState: Boolean(state),
+      hasStateCookie: Boolean(cookieState),
+      statesMatch: Boolean(state && cookieState && state === cookieState),
+      cookieHeaderPresent: Boolean(rawCookieHeader),
+      cookieCountInHeader: rawCookieHeader ? rawCookieHeader.split(';').length : 0,
+    });
     return redirectWithError(request, 'invalid_oauth_state');
   }
 
