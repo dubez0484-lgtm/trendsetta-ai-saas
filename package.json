@@ -5,7 +5,7 @@
   "description": "Meta Comment-to-DM Automation Engine — watches Instagram/Facebook comments, matches keywords, and sends automated private DMs. Exposes an MCP server for AI agent control.",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
