@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { ApiError, toErrorResponse } from '@/lib/errors/api-error';
 
@@ -28,6 +28,27 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: user }, { status: 201 });
   } catch (error) {
-    return toErrorResponse(error);
+    // Expected error paths (email conflict, bad input) keep the normal
+    // safe response shape.
+    if (error instanceof ApiError || error instanceof ZodError) {
+      return toErrorResponse(error);
+    }
+
+    // TEMPORARY DIAGNOSTIC — remove once the real production error is
+    // identified. Exposes the raw error (message + stack + any extra
+    // properties, e.g. Prisma's `code`/`meta`) directly in the response so
+    // it's visible without needing Vercel Runtime Log access. This is a
+    // real security regression while it's in place — anyone who can hit
+    // this endpoint sees internal error detail, and a Prisma connection
+    // string parse failure can echo the connection string (credentials
+    // included) into `error.message`. Revert to `return toErrorResponse(error)`
+    // as soon as the cause is confirmed from this output.
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? JSON.stringify(error, Object.getOwnPropertyNames(error)) : String(error),
+      },
+      { status: 500 },
+    );
   }
 }
