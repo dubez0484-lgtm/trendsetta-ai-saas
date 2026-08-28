@@ -49,20 +49,36 @@ export async function GET(request: NextRequest) {
     return redirectWithError(request, 'invalid_oauth_state');
   }
 
+  // Each step is wrapped separately so a failure's log line says exactly
+  // which one broke (token exchange vs. Meta discovery vs. our own DB
+  // write) instead of one generic "connection_failed" covering all three —
+  // that ambiguity is exactly what made the earlier signup DB issue slow
+  // to diagnose.
+  let step = 'token_exchange';
   try {
     const shortLived = await exchangeCodeForToken(code);
+
+    step = 'long_lived_token_exchange';
     const longLived = await exchangeForLongLivedToken(shortLived.access_token);
+
+    step = 'account_discovery';
     const pages = await discoverPagesAndInstagramAccounts(longLived.access_token);
+
+    step = 'persist_accounts';
     await persistDiscoveredAccounts(userId, pages);
 
     const response = NextResponse.redirect(new URL('/dashboard/accounts?connected=1', request.url));
     response.cookies.delete(META_OAUTH_STATE_COOKIE);
     return response;
   } catch (error) {
+    const prismaCode = (error as { code?: string } | undefined)?.code;
     logger.error('meta_oauth_callback_failed', {
+      step,
+      errorName: error instanceof Error ? error.constructor.name : typeof error,
       message: error instanceof Error ? error.message : String(error),
+      ...(prismaCode ? { prismaCode } : {}),
     });
-    const response = redirectWithError(request, 'connection_failed');
+    const response = redirectWithError(request, `connection_failed_at_${step}`);
     response.cookies.delete(META_OAUTH_STATE_COOKIE);
     return response;
   }

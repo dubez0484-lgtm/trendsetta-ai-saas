@@ -7,7 +7,10 @@ export const dynamic = 'force-dynamic';
 const ERROR_MESSAGES: Record<string, string> = {
   meta_authorization_denied: 'You declined the Meta authorization request.',
   invalid_oauth_state: 'The connection request expired or was invalid — please try again.',
-  connection_failed: 'Something went wrong while connecting your Meta account. Check server logs for details.',
+  connection_failed_at_token_exchange: 'Failed to exchange the authorization code with Meta. Check META_APP_ID/META_APP_SECRET/META_REDIRECT_URI.',
+  connection_failed_at_long_lived_token_exchange: 'Failed to exchange for a long-lived token with Meta.',
+  connection_failed_at_account_discovery: "Failed to discover your Facebook Pages/Instagram accounts — check that your account has a role on the Meta app and the required permissions are granted.",
+  connection_failed_at_persist_accounts: 'Connected to Meta successfully, but saving the account failed — likely a database issue. Check server logs.',
 };
 
 export default async function AccountsPage({ searchParams }: { searchParams: { connected?: string; error?: string } }) {
