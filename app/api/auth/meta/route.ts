@@ -24,14 +24,10 @@ export async function GET(request: NextRequest) {
   const response = NextResponse.redirect(authorizationUrl);
   response.cookies.set(META_OAUTH_STATE_COOKIE, state, {
     httpOnly: true,
-    // Hardcoding `true` here would break local HTTP dev — browsers drop
-    // Secure cookies outright over plain http://localhost. On Vercel,
-    // NODE_ENV is 'production' for the deployment this OAuth flow actually
-    // runs against, so this already evaluates to true there.
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     sameSite: 'lax',
-    maxAge: 60 * 15,
     path: '/',
+    maxAge: 900,
   });
 
   return response;
