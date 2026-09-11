@@ -121,15 +121,51 @@ sits under a paid plan, and connected to a new GitHub repo,
 |---|---|
 | GitHub repo `dubez0484-lgtm/remix-of-trendsetter-os` | **Exists, reachable, cloned.** Full Vite/React/TS/Supabase scaffold (`src/`, `supabase/`, `package.json`, `vite.config.ts`). Single commit on `main`: "Add project README" (2026-08-26 01:00 UTC). Has a committed `.env` at root — checked contents: only `SUPABASE_PROJECT_ID` / `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` (anon/publishable key, safe to be public) — **not a secret leak**, unlike the `.env` files flagged in the other two repos in the 2026-08-25 audit above (those haven't been re-checked, still flagged). |
 | Lovable project "Remix of Remix of Trendsetter OS" | **Exists** in the "Miish's Lovable" workspace, id `481368c2-232b-4046-8b78-12814b9f3f3d`, status `completed`/`ready`, live preview renders correctly (THETRENDSETTA landing page, cyberpunk-luxury styling matches brand system). `Miish's Lovable` is the only workspace visible to this session's connected Lovable account — matches the "moved to a paid plan under Miish" story. |
-| Supabase connection | **⚠️ Cannot verify — likely broken or under a different account.** The repo's `.env` points at Supabase project ref `qhsetblivjmpqzmpohad`, but this session's connected Supabase account only has access to 3 projects (`Thetrendsetta®-opportunity`, `Thetrendsetta™`, `Orange restaurant Demo`) — `qhsetblivjmpqzmpohad` is not among them, and a direct lookup was denied ("do not have permission"). **Do not assume tables/schema exist for this project** — this needs to be resolved (is it under Miish's Supabase account? does Zakhele's Supabase account need inviting as a collaborator?) before any schema-first DB work (e.g. Lead Magnet Builder) proceeds against it. |
+| Supabase connection | **✅ Resolved 2026-09-09 — the ref above was stale.** The live project is **`qcnwhabljcwulospklom`**, read directly from the live Lovable project's own `.env`. The old `qhsetblivjmpqzmpohad` was never reachable and is now corrected in `remix-of-trendsetter-os/.env` too. It is **not** in the connected Supabase account's project list because Lovable Cloud provisions and owns the Supabase project — so `mcp__Supabase__*` tools cannot see it. **Use `mcp__Lovable__query_database` for all DB work on this project**; it has elevated access and works. Schema verified live this way (lm_*, course_*, payfast_payments, user_roles all present). |
 
 Rename cleanup still open: project displays as "Remix of Remix of Trendsetter
 OS" — cosmetic, low priority.
 
-## Open reconciliation issue
+## Reconciliation issue — partly resolved 2026-09-09
 
-KasiOS, ComplyLink, Khumo, LekkerTable, MEGA Link, and EOS School are
-active THETRENDSETTA projects that do NOT currently appear in the
-"Zakhele's Lovable" workspace or the `dubez0484-lgtm` GitHub account.
-Do not assume they don't exist — flag this every session until resolved,
-and ask whether a second account/workspace holds them.
+The second workspace was found. The Lovable account
+`thetrendsettaofficial@gmail.com` ("Brain's Lovable", id
+`onyWICzu7QWvq4LP0Klv`) holds **EOS School Studio** and **LekkerTable
+Bookings** — two of the six projects previously thought missing. Also in
+there: Trendsetter Funnel, Grant Navigator, Neon Studio AI, TikTok Video
+Magic.
+
+Still not located anywhere: **KasiOS, ComplyLink, Khumo, MEGA Link.** Do not
+assume they don't exist — keep flagging until found.
+
+### Lovable accounts — three of them, and the MCP connection flips between them
+
+| Account | Workspaces | Sees the live Trendsetter OS project? |
+|---|---|---|
+| `dubez0484@gmail.com` (Zakhele Dube) | Zakhele's Lovable (owner), Miish's Lovable (member) | **Yes** — use this one |
+| `lordmiish531@gmail.com` (Miish The Dj) | Miish's Lovable (owner) | Yes |
+| `thetrendsettaofficial@gmail.com` (brain_trend) | Brain's Lovable (owner) | No — 404s on the project |
+
+The connection alternates between these without warning. If a Lovable tool
+returns `404 project_not_found`, call `get_me` first — it is almost always the
+wrong account, not a missing project.
+
+## Lovable Cloud: custom secrets never reach the app server
+
+Confirmed empirically 2026-09-09, not assumed. Only Lovable's own managed
+variables (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`,
+`SUPABASE_SERVICE_ROLE_KEY`) are injected into the app server's `process.env`.
+Custom secrets added in Project Settings → Secrets go **only to Supabase Edge
+Functions**, which this app does not use. `VITE_*` is a separate build-time
+mechanism baked into the client bundle, so it must never hold a secret.
+
+A diagnostic endpoint in the same process as the checkout handler returned
+`SUPABASE_URL: true` with all four `PAYFAST_*: false`, after the secrets were
+saved, the server restarted, and the app published. "Build secrets" in Project
+Settings is Enterprise-gated on this plan and is not the answer either.
+
+**Pattern to use instead:** put the credential in Supabase Vault and read it
+through a `security definer` function granted only to `service_role` — see
+`public.get_payfast_config()` and
+`supabase/migrations/20260909190000_payfast_vault_config.sql` in
+`remix-of-trendsetter-os`. Do not burn time re-testing env vars for this stack.
