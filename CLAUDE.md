@@ -60,7 +60,7 @@ soft glow, glassmorphism, mobile-first responsive by default.
 
 | GitHub repo | Lovable project (workspace: Zakhele's Lovable) | Status |
 |---|---|---|
-| | | |
+| `dubez0484-lgtm/remix-of-trendsetter-os` | **Remix of Trendsetter OS** — `714e226f-ecc9-42f2-b3cd-82c60c1143c5` | **Authoritative THETRENDSETTA OS.** Synced on branch `main`; verified at commit `8b89e2113a8d0738c063fb3a74aafc4bf8e0f9d3`. Supabase project `qcnwhabljcwulospklom`. |
 
 ### Repo audit — 2026-08-25 (corrected)
 
@@ -87,9 +87,10 @@ repos under personal accounts) is real and unrelated to the scoping bug.
 | `thetrendsetta-system` | Private | 0 | 0 Bytes | none — repo has no commits at all | **Truly empty** — needs a fresh "Sync my code" push from its matching Lovable project |
 | `ThetrendsettaOs` | — | — | — | — | **Does not exist, still can't be created** — GitHub Apps cannot create repos under personal GitHub accounts (platform restriction, not a permission gap) |
 
-**Lovable workspace inventory** (`Zakhele's Lovable`, 8 projects; none
-currently show a linked/synced GitHub repo — none have run "Sync my code"
-yet):
+**Lovable workspace inventory** (`Zakhele's Lovable`, as audited 2026-08-25;
+at that point none showed a linked/synced GitHub repo. Superseded for
+Trendsetter OS: **Remix of Trendsetter OS** is synced — see the mapping table
+above):
 
 | Lovable project | Display name |
 |---|---|
@@ -120,7 +121,6 @@ sits under a paid plan, and connected to a new GitHub repo,
 | Check | Result |
 |---|---|
 | GitHub repo `dubez0484-lgtm/remix-of-trendsetter-os` | **Exists, reachable, cloned.** Full Vite/React/TS/Supabase scaffold (`src/`, `supabase/`, `package.json`, `vite.config.ts`). Single commit on `main`: "Add project README" (2026-08-26 01:00 UTC). Has a committed `.env` at root — checked contents: only `SUPABASE_PROJECT_ID` / `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` (anon/publishable key, safe to be public) — **not a secret leak**, unlike the `.env` files flagged in the other two repos in the 2026-08-25 audit above (those haven't been re-checked, still flagged). |
-| Lovable project "Remix of Remix of Trendsetter OS" | **Exists** in the "Miish's Lovable" workspace, id `481368c2-232b-4046-8b78-12814b9f3f3d`, status `completed`/`ready`, live preview renders correctly (THETRENDSETTA landing page, cyberpunk-luxury styling matches brand system). `Miish's Lovable` is the only workspace visible to this session's connected Lovable account — matches the "moved to a paid plan under Miish" story. |
 | Supabase connection | **✅ Resolved 2026-09-09 — the ref above was stale.** The live project is **`qcnwhabljcwulospklom`**, read directly from the live Lovable project's own `.env`. The old `qhsetblivjmpqzmpohad` was never reachable and is now corrected in `remix-of-trendsetter-os/.env` too. It is **not** in the connected Supabase account's project list because Lovable Cloud provisions and owns the Supabase project — so `mcp__Supabase__*` tools cannot see it. **Use `mcp__Lovable__query_database` for all DB work on this project**; it has elevated access and works. Schema verified live this way (lm_*, course_*, payfast_payments, user_roles all present). |
 
 Rename cleanup still open: project displays as "Remix of Remix of Trendsetter
